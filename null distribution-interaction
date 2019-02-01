@@ -1,0 +1,61 @@
+#################################################################################
+############Test of heterogeneity in the SNP-environment interaction#############
+#################################################################################
+library(MASS)
+
+DataPath<-"/data/qjin/snpE effect1type1error/"
+f<-0.3
+mu<-0
+sigmaE<-1
+sigmae<-1
+
+
+effect1<-0.1
+effect2<-0
+effect3<-0.02
+effect4<-0
+sigmav<-matrix(c(effect3*2*f*(1-f),0,0,effect4*2*f*(1-f)),nrow=2)
+
+beta1<-sqrt(effect1)
+beta2<-sqrt(effect2)
+c3<-sqrt(0.1)
+
+m<-1000
+datastudy<-data.frame()
+for(j in 1:1000){
+  for(k in 1:50){
+
+    SNP<-vector()
+    v<-mvrnorm(n=1,rep(0,2),sigmav)
+    c1<-beta1+v[1]
+    c2<-beta2+v[2]
+    c4<-sqrt(1-effect1*2*f*(1-f)-effect2*2*f*(1-f)-effect3*2*f*(1-f)-effect4*2*f*(1-f)-0.1)
+    a<-runif(m,0,1)
+    for(i in 1:m){
+      if(0<=a[i]&a[i]<=f*f)
+      {SNP[i]<-2
+      #h<-h+1
+      }
+      else if(f*f<a[i]&a[i]<=f*f+2*f*(1-f))
+      {SNP[i]<-1
+      #s<-s+1
+      }
+      else
+      {SNP[i]<-0
+      #m<-m+1
+      }}
+    E<-rnorm(m,0,sigmaE)
+    e<-rnorm(m,0,sigmae)
+    SNP<-SNP-2*f
+    Y<-mu+c1*SNP+c3*E+c4*e
+    
+    datastudy<-data.frame(Y,SNP,E)
+    filePath<-paste(DataPath,"data/rep",as.character(j),"study",as.character(k),".csv",sep='')
+    write.csv(datastudy,file =filePath)
+    
+    
+  }
+  
+}
+
+
